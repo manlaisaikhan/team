@@ -1,184 +1,199 @@
-'use client'
+"use client";
 
-import { useEffect, useState } from 'react'
-import { useRouter, useParams } from 'next/navigation'
-import { Button } from '@/components/ui/button'
-import { Textarea } from '@/components/ui/textarea'
-import { Input } from '@/components/ui/input'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { useMemo, useState } from "react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import {
+  Globe,
+  Image as ImgIcon,
+  Sparkles,
+  Filter,
+  ArrowRight,
+} from "lucide-react";
 
-interface Project {
-  id: string
-  title: string
-  description: string
-  url: string | null
-  screenshot: string | null
-  user: {
-    id: string
-    name: string | null
-    email: string
-  }
+/* =======================
+   Mock data (Design only)
+   ======================= */
+const MOCK_PROJECTS = [
+  {
+    id: "p1",
+    title: "Landing page — Animation + Navbar",
+    description:
+      "Hero section дээр responsive + navbar overflow шалгаад bug report хийгээрэй.",
+    url: "https://example.com",
+    screenshot: null,
+    status: "OPEN",
+    user: { name: "Manlai", email: "manlai@mail.com" },
+  },
+  {
+    id: "p2",
+    title: "Auth flow — Reset Password",
+    description: "Forgot password → reset link → redirect зөв эсэхийг шалга.",
+    url: "https://auth.example.com",
+    screenshot:
+      "https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=1200&auto=format&fit=crop",
+    status: "OPEN",
+    user: { name: "Alpha", email: "alpha@mail.com" },
+  },
+  {
+    id: "p3",
+    title: "Mobile UI — Sidebar toggle",
+    description: "iPhone дээр sidebar animation тасалдах эсэхийг шалга.",
+    url: null,
+    screenshot: null,
+    status: "OPEN",
+    user: { name: null, email: "hunter@mail.com" },
+  },
+];
+
+function GlassCard({
+  children,
+  className = "",
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <div
+      className={`rounded-2xl bg-white/5 border border-white/10 backdrop-blur-xl shadow-[0_20px_60px_rgba(99,102,241,0.10)] ${className}`}
+    >
+      {children}
+    </div>
+  );
 }
 
-export default function TestProjectPage() {
-  const router = useRouter()
-  const params = useParams()
-  const [project, setProject] = useState<Project | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [submitting, setSubmitting] = useState(false)
-  const [bugData, setBugData] = useState({
-    description: '',
-    screenshot: '',
-  })
+function Pill({
+  active,
+  children,
+  onClick,
+}: {
+  active?: boolean;
+  children: React.ReactNode;
+  onClick?: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`h-9 px-3 rounded-full text-sm border backdrop-blur-md transition
+        ${
+          active
+            ? "bg-white/12 border-white/25 text-white"
+            : "bg-white/5 border-white/10 text-white/75 hover:bg-white/8"
+        }`}
+      type="button"
+    >
+      {children}
+    </button>
+  );
+}
 
-  useEffect(() => {
-    if (params.id) {
-      fetchProject()
-    }
-  }, [params.id])
+export default function TestPage() {
+  const [onlyOpen, setOnlyOpen] = useState(true);
+  const [onlyWithUrl, setOnlyWithUrl] = useState(false);
+  const [onlyWithShot, setOnlyWithShot] = useState(false);
 
-  const fetchProject = async () => {
-    try {
-      const response = await fetch(`/api/projects/${params.id}`)
-      if (response.ok) {
-        const data = await response.json()
-        setProject(data)
-      }
-    } catch (error) {
-      console.error('Error fetching project:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
+  const filtered = useMemo(() => {
+    return MOCK_PROJECTS.filter((p) => {
+      if (onlyOpen && p.status !== "OPEN") return false;
+      if (onlyWithUrl && !p.url) return false;
+      if (onlyWithShot && !p.screenshot) return false;
+      return true;
+    });
+  }, [onlyOpen, onlyWithUrl, onlyWithShot]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setSubmitting(true)
-
-    try {
-      const response = await fetch('/api/bugs', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          projectId: params.id,
-          description: bugData.description,
-          screenshot: bugData.screenshot || null,
-        }),
-      })
-
-      if (response.ok) {
-        router.push('/test')
-        router.refresh()
-      } else {
-        const error = await response.json()
-        alert(error.error || 'Алдаа гарлаа')
-      }
-    } catch (error) {
-      console.error('Error submitting bug:', error)
-      alert('Алдаа гарлаа')
-    } finally {
-      setSubmitting(false)
-    }
-  }
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
-        <p>Уншиж байна...</p>
-      </div>
-    )
-  }
-
-  if (!project) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
-        <p>Вебсайт олдсонгүй</p>
-      </div>
-    )
-  }
+  const recommended = filtered[0];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4">
-      <div className="max-w-4xl mx-auto space-y-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>{project.title}</CardTitle>
-            <CardDescription>
-              {project.user.name || project.user.email}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="mb-4">{project.description}</p>
-            {project.screenshot && (
-              <img
-                src={project.screenshot}
-                alt={project.title}
-                className="w-full rounded mb-4"
-              />
-            )}
-            {project.url && (
-              <Button
-                variant="outline"
-                onClick={() => window.open(project.url!, '_blank')}
-                className="mb-4"
+    <div className="min-h-screen bg-black">
+      {/* Glow bg */}
+      <div className="pointer-events-none fixed inset-0">
+        <div className="absolute -top-40 -left-40 w-[520px] h-[520px] rounded-full bg-indigo-500/25 blur-[120px]" />
+        <div className="absolute bottom-0 right-0 w-[420px] h-[420px] rounded-full bg-cyan-400/20 blur-[120px]" />
+      </div>
+
+      <div className="relative max-w-7xl mx-auto px-6 md:px-10 py-10 space-y-6">
+        {/* Header */}
+        <div className="flex flex-col md:flex-row md:justify-between md:items-end gap-4">
+          <div>
+            <h1 className="text-4xl font-extrabold">
+              <span className="bg-gradient-to-r from-cyan-300 via-blue-400 to-violet-400 bg-clip-text text-transparent">
+                Шалгах Mode
+              </span>
+            </h1>
+            <p className="mt-4 text-white/75 max-w-xl">
+              Website нээ → Bug ол → Report илгээ. Илгээх бүрт оноо авна.
+            </p>
+          </div>
+
+          {/* Filters */}
+          <GlassCard className="p-3">
+            <div className="flex items-center gap-2 text-white/70 text-sm mb-2">
+              <Filter className="h-4 w-4" /> Filter
+            </div>
+            <div className="flex gap-2 flex-wrap">
+              <Pill active={onlyOpen} onClick={() => setOnlyOpen(!onlyOpen)}>
+                Open only
+              </Pill>
+              <Pill
+                active={onlyWithUrl}
+                onClick={() => setOnlyWithUrl(!onlyWithUrl)}
               >
-                Вебсайт нээх
-              </Button>
-            )}
-          </CardContent>
-        </Card>
+                Has URL
+              </Pill>
+              <Pill
+                active={onlyWithShot}
+                onClick={() => setOnlyWithShot(!onlyWithShot)}
+              >
+                Has Screenshot
+              </Pill>
+            </div>
+          </GlassCard>
+        </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Алдаа олох</CardTitle>
-            <CardDescription>
-              Олсон алдаагаа дэлгэрэнгүй тайлбарлана уу
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Recommended */}
+        {recommended && (
+          <GlassCard className="p-6">
+            <div className="flex justify-between items-center gap-4">
               <div>
-                <label htmlFor="description" className="block text-sm font-medium mb-2">
-                  Алдааны тайлбар *
-                </label>
-                <Textarea
-                  id="description"
-                  value={bugData.description}
-                  onChange={(e) => setBugData({ ...bugData, description: e.target.value })}
-                  required
-                  placeholder="Алдааны дэлгэрэнгүй тайлбар"
-                  rows={6}
-                />
+                <div className="text-xs text-white/60">Recommended</div>
+                <h2 className="text-lg text-white font-semibold">
+                  {recommended.title}
+                </h2>
+                <p className="mt-1 text-white/70 text-sm line-clamp-2">
+                  {recommended.description}
+                </p>
               </div>
-
-              <div>
-                <label htmlFor="screenshot" className="block text-sm font-medium mb-2">
-                  Скриншот URL (сонголттой)
-                </label>
-                <Input
-                  id="screenshot"
-                  type="url"
-                  value={bugData.screenshot}
-                  onChange={(e) => setBugData({ ...bugData, screenshot: e.target.value })}
-                  placeholder="https://example.com/screenshot.png"
-                />
-              </div>
-
-              <div className="flex gap-4">
-                <Button type="submit" disabled={submitting}>
-                  {submitting ? 'Илгээж байна...' : 'Илгээх'}
+              <Link href={`/test/${recommended.id}`}>
+                <Button className="bg-gradient-to-r from-blue-600 to-violet-600 text-white">
+                  Эхлүүлэх <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
-                <Button type="button" variant="outline" onClick={() => router.back()}>
-                  Буцах
-                </Button>
+              </Link>
+            </div>
+          </GlassCard>
+        )}
+
+        {/* Grid */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filtered.map((p) => (
+            <GlassCard key={p.id}>
+              {p.screenshot ? (
+                <img src={p.screenshot} className="h-40 w-full object-cover" />
+              ) : (
+                <div className="h-40 bg-white/5" />
+              )}
+              <div className="p-5">
+                <h3 className="text-white font-semibold">{p.title}</h3>
+                <p className="mt-2 text-white/70 text-sm line-clamp-3">
+                  {p.description}
+                </p>
+                <p className="mt-3 text-xs text-white/50">
+                  {p.user.name || p.user.email}
+                </p>
               </div>
-            </form>
-          </CardContent>
-        </Card>
+            </GlassCard>
+          ))}
+        </div>
       </div>
     </div>
-  )
+  );
 }
-

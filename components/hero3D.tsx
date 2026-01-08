@@ -3,25 +3,24 @@
 import Spline from "@splinetool/react-spline/next";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
 
 export default function Hero3D() {
   const router = useRouter();
-  const [loaded, setLoaded] = useState(false);
 
   return (
     <section className="relative w-full h-[calc(100vh-56px)] overflow-hidden">
-      {/* ✅ 3D */}
+      {/* ✅ 3D — ӨӨРЧЛӨӨГҮЙ */}
       <Spline scene="https://prod.spline.design/PoidP2yX28eZYdlE/scene.splinecode" />
 
-      {/* ✅ уншихад гоё overlay (3D event хаахгүй) */}
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/25 via-black/10 to-black/35" />
+      {/* ✅ Уншихад гоё overlay (3D event хаахгүй) */}
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/35 via-black/10 to-black/55" />
 
-      {/* ✅ UI overlay (ерөнхийдөө event хаана, зөвхөн CTA дээр нээнэ) */}
+      {/* ✅ UI overlay */}
       <div className="pointer-events-none absolute inset-0 z-20 flex items-center">
-        <div className="container mx-auto px-6">
+        {/* ✅ Доорх section-уудтай таарсан padding/өргөн */}
+        <div className="mx-auto w-full max-w-7xl px-6 md:px-10">
           <div className="max-w-xl pointer-events-auto">
-            <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight">
+            <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight leading-[1.05]">
               <span className="bg-gradient-to-r from-cyan-300 via-blue-400 to-violet-400 bg-clip-text text-transparent drop-shadow-[0_0_25px_rgba(99,102,241,0.45)]">
                 Bug Testing Platform
               </span>
@@ -34,6 +33,7 @@ export default function Hero3D() {
               <span className="text-white font-semibold">оноо</span> цуглуул.
             </p>
 
+            {/* ✅ CTA — route хэвээр */}
             <div className="mt-8 flex flex-col sm:flex-row gap-4">
               <Button
                 size="lg"
@@ -53,12 +53,18 @@ export default function Hero3D() {
               </Button>
             </div>
 
-            <div className="mt-6 inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-white/80 text-sm backdrop-blur">
+            {/* ✅ Status text — onLoad ашиглахгүй */}
+            <div className="mt-6 inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-white/80 text-sm backdrop-blur border border-white/10">
               <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-              {loaded ? "Live 3D • Spline" : "Loading 3D..."}
+              Live 3D • Spline
             </div>
           </div>
         </div>
+      </div>
+
+      {/* жижиг scroll hint (optional) */}
+      <div className="pointer-events-none absolute bottom-6 left-1/2 -translate-x-1/2 z-30 text-white/60 text-sm">
+        Scroll ↓
       </div>
     </section>
   );

@@ -1,130 +1,293 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  CheckCircle2,
+  Circle,
+  Globe,
+  Image as ImgIcon,
+  Sparkles,
+  ArrowRight,
+  X,
+} from "lucide-react";
 
-export default function SubmitPage() {
-  const router = useRouter()
-  const [loading, setLoading] = useState(false)
-  const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    url: '',
-    screenshot: '',
-  })
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-
-    try {
-      const response = await fetch('/api/projects', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      })
-
-      if (response.ok) {
-        router.push('/')
-        router.refresh()
-      } else {
-        const errorData = await response.json()
-        const errorMessage = errorData.error || errorData.message || 'Алдаа гарлаа'
-        console.error('API Error:', errorData)
-        alert(`Алдаа: ${errorMessage}`)
-      }
-    } catch (error: any) {
-      console.error('Error submitting project:', error)
-      alert(`Алдаа гарлаа: ${error.message || 'Unknown error'}`)
-    } finally {
-      setLoading(false)
-    }
-  }
-
+function GlassCard({
+  children,
+  className = "",
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4">
-      <div className="max-w-2xl mx-auto">
-        <Card>
-          <CardHeader>
-            <CardTitle>Шалгуулах</CardTitle>
-            <CardDescription>
-              Таны вебсайтыг шалгахын тулд мэдээлэл оруулна уу
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label htmlFor="title" className="block text-sm font-medium mb-2">
-                  Гарчиг *
-                </label>
-                <Input
-                  id="title"
-                  value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  required
-                  placeholder="Вебсайтын нэр"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="description" className="block text-sm font-medium mb-2">
-                  Тайлбар *
-                </label>
-                <Textarea
-                  id="description"
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  required
-                  placeholder="Вебсайтын тайлбар"
-                  rows={6}
-                />
-              </div>
-
-              <div>
-                <label htmlFor="url" className="block text-sm font-medium mb-2">
-                  URL (сонголттой)
-                </label>
-                <Input
-                  id="url"
-                  type="url"
-                  value={formData.url}
-                  onChange={(e) => setFormData({ ...formData, url: e.target.value })}
-                  placeholder="https://example.com"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="screenshot" className="block text-sm font-medium mb-2">
-                  Скриншот URL (сонголттой)
-                </label>
-                <Input
-                  id="screenshot"
-                  type="url"
-                  value={formData.screenshot}
-                  onChange={(e) => setFormData({ ...formData, screenshot: e.target.value })}
-                  placeholder="https://example.com/screenshot.png"
-                />
-              </div>
-
-              <div className="flex gap-4">
-                <Button type="submit" disabled={loading}>
-                  {loading ? 'Илгээж байна...' : 'Илгээх'}
-                </Button>
-                <Button type="button" variant="outline" onClick={() => router.back()}>
-                  Цуцлах
-                </Button>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
-      </div>
+    <div
+      className={[
+        "rounded-2xl bg-white/5 border border-white/10 backdrop-blur-xl",
+        "shadow-[0_20px_60px_rgba(99,102,241,0.10)]",
+        className,
+      ].join(" ")}
+    >
+      {children}
     </div>
-  )
+  );
 }
 
+export default function SubmitPage() {
+  const [formData, setFormData] = useState({
+    title: "",
+    description: "",
+    url: "",
+    screenshot: "",
+  });
+
+  const clearAll = () =>
+    setFormData({ title: "", description: "", url: "", screenshot: "" });
+
+  const onSubmitUIOnly = (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log("UI only submit:", formData);
+    // энд API/route байхгүй (frontend only)
+  };
+
+  return (
+    <div className="min-h-screen bg-black">
+      {/* glow bg like Home */}
+      <div className="pointer-events-none fixed inset-0">
+        <div className="absolute -top-40 -left-40 h-[520px] w-[520px] rounded-full bg-indigo-500/25 blur-[120px]" />
+        <div className="absolute bottom-0 right-0 h-[420px] w-[420px] rounded-full bg-cyan-400/20 blur-[120px]" />
+      </div>
+
+      <div className="relative mx-auto w-full max-w-6xl px-6 md:px-10 py-10">
+        {/* Header */}
+        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+          <div>
+            <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight">
+              <span className="bg-gradient-to-r from-cyan-300 via-blue-400 to-violet-400 bg-clip-text text-transparent drop-shadow-[0_0_25px_rgba(99,102,241,0.45)]">
+                Шалгуулах
+              </span>
+            </h1>
+            <div className="mt-3 h-[2px] w-28 bg-gradient-to-r from-cyan-400 via-blue-500 to-violet-500 rounded-full opacity-80" />
+            <p className="mt-4 text-white/75 max-w-2xl">
+              Вебсайт/төслөө оруулаад community-д шалгуулаарай. Сайн
+              тайлбарласан төслүүд хурдан шалгагдана.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Button
+              variant="secondary"
+              className="h-10 bg-white/10 text-white border border-white/15 hover:bg-white/15"
+              type="button"
+              onClick={() => history.back()}
+            >
+              Цуцлах
+            </Button>
+
+            <Button
+              variant="secondary"
+              className="h-10 bg-white/10 text-white border border-white/15 hover:bg-white/15"
+              onClick={clearAll}
+              type="button"
+            >
+              <X className="h-4 w-4 mr-2" />
+              Цэвэрлэх
+            </Button>
+          </div>
+        </div>
+
+        <div className="mt-8 grid lg:grid-cols-12 gap-6">
+          {/* LEFT: Form */}
+          <div className="lg:col-span-8">
+            <GlassCard className="p-6 md:p-7">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <div className="inline-flex items-center gap-2 rounded-full bg-white/10 border border-white/10 px-3 py-1 text-white/80 text-sm backdrop-blur">
+                    <Sparkles className="h-4 w-4" />
+                    Project Submit
+                  </div>
+                  <h2 className="mt-4 text-white text-xl font-semibold">
+                    Төслийн мэдээлэл
+                  </h2>
+                  <p className="mt-1 text-white/60 text-sm">
+                    * Тайлбар дээр “юуг шалгах вэ?” гэдгийг тодорхой бич.
+                  </p>
+                </div>
+              </div>
+
+              <form onSubmit={onSubmitUIOnly} className="mt-6 space-y-5">
+                {/* Title */}
+                <div>
+                  <label className="block text-sm font-medium text-white/80 mb-2">
+                    Гарчиг <span className="text-white/50">*</span>
+                  </label>
+                  <Input
+                    value={formData.title}
+                    onChange={(e) =>
+                      setFormData({ ...formData, title: e.target.value })
+                    }
+                    placeholder="Жишээ: Landing page — Navbar + Hero"
+                    className="h-11 bg-white/5 border-white/15 text-white placeholder:text-white/40
+                               focus-visible:ring-0 focus-visible:border-white/30
+                               transition hover:border-white/25"
+                  />
+                  <div className="mt-2 text-xs text-white/45">
+                    UI only (validation байхгүй)
+                  </div>
+                </div>
+
+                {/* Description */}
+                <div>
+                  <label className="block text-sm font-medium text-white/80 mb-2">
+                    Тайлбар <span className="text-white/50">*</span>
+                  </label>
+                  <Textarea
+                    value={formData.description}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        description: e.target.value,
+                      })
+                    }
+                    placeholder={`Юуг шалгах вэ?\n- Page: /pricing\n- Flow: sign up → checkout\n- Expected vs actual\n- Device/Browser`}
+                    rows={7}
+                    className="bg-white/5 border-white/15 text-white placeholder:text-white/40
+                               focus-visible:ring-0 focus-visible:border-white/30
+                               transition hover:border-white/25"
+                  />
+                  <div className="mt-2 text-xs text-white/45">
+                    UI only (validation байхгүй)
+                  </div>
+                </div>
+
+                {/* URL */}
+                <div>
+                  <label className="block text-sm font-medium text-white/80 mb-2">
+                    URL (сонголттой)
+                  </label>
+                  <div className="relative">
+                    <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/40" />
+                    <Input
+                      value={formData.url}
+                      onChange={(e) =>
+                        setFormData({ ...formData, url: e.target.value })
+                      }
+                      placeholder="https://example.com"
+                      className="h-11 pl-10 bg-white/5 border-white/15 text-white placeholder:text-white/40
+                                 focus-visible:ring-0 focus-visible:border-white/30
+                                 transition hover:border-white/25"
+                    />
+                  </div>
+                </div>
+
+                {/* Screenshot */}
+                <div>
+                  <label className="block text-sm font-medium text-white/80 mb-2">
+                    Скриншот URL (сонголттой)
+                  </label>
+                  <div className="relative">
+                    <ImgIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/40" />
+                    <Input
+                      value={formData.screenshot}
+                      onChange={(e) =>
+                        setFormData({ ...formData, screenshot: e.target.value })
+                      }
+                      placeholder="https://example.com/screenshot.png"
+                      className="h-11 pl-10 bg-white/5 border-white/15 text-white placeholder:text-white/40
+                                 focus-visible:ring-0 focus-visible:border-white/30
+                                 transition hover:border-white/25"
+                    />
+                  </div>
+                </div>
+
+                {/* Actions */}
+                <div className="pt-2 flex flex-col sm:flex-row gap-3">
+                  <Button
+                    type="submit"
+                    className={[
+                      "h-11 text-white font-semibold",
+                      "bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600",
+                      "shadow-[0_10px_28px_rgba(79,70,229,0.35)] hover:shadow-[0_12px_36px_rgba(79,70,229,0.55)]",
+                      "hover:brightness-110 active:scale-[0.98] transition",
+                    ].join(" ")}
+                  >
+                    Илгээх <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    className="h-11 bg-white/10 text-white border border-white/15 hover:bg-white/15 transition"
+                    onClick={() => history.back()}
+                  >
+                    Буцах
+                  </Button>
+                </div>
+              </form>
+            </GlassCard>
+          </div>
+
+          {/* RIGHT: Static checklist + preview */}
+          <div className="lg:col-span-4 space-y-6">
+            <GlassCard className="p-6 sticky top-20">
+              <div className="text-white font-semibold text-lg">
+                Ready checklist
+              </div>
+              <p className="mt-2 text-white/60 text-sm">
+                (UI only) Checklist нь статик.
+              </p>
+
+              <div className="mt-5 space-y-3">
+                {[
+                  { title: "1) Гарчиг", desc: "Товч, ойлгомжтой" },
+                  { title: "2) Тайлбар", desc: "“Юуг шалгах вэ?” + flow бич" },
+                  { title: "3) URL format", desc: "Оруулсан бол зөв байх" },
+                  { title: "4) Screenshot URL", desc: "Сонголттой" },
+                ].map((s) => (
+                  <div
+                    key={s.title}
+                    className="rounded-xl bg-white/5 border border-white/10 p-3 flex items-start gap-3"
+                  >
+                    <Circle className="h-5 w-5 text-white/35 mt-0.5" />
+                    <div>
+                      <div className="text-white/90 font-medium">{s.title}</div>
+                      <div className="text-white/55 text-sm">{s.desc}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-5 h-px bg-white/10" />
+              <div className="mt-4 text-sm text-white/70">
+                Status: <span className="text-white/55">UI ONLY</span>
+              </div>
+
+              {/* Preview */}
+              <div className="mt-5 rounded-2xl bg-gradient-to-br from-white/6 to-white/3 border border-white/10 p-4">
+                <div className="text-white/60 text-xs mb-2">Preview</div>
+                <div className="text-white font-semibold line-clamp-1">
+                  {formData.title.trim() ? formData.title : "Project title…"}
+                </div>
+                <div className="mt-2 text-white/70 text-sm line-clamp-3">
+                  {formData.description.trim()
+                    ? formData.description
+                    : "Project description preview…"}
+                </div>
+
+                <div className="mt-3 flex flex-wrap gap-2 text-xs text-white/65">
+                  <span className="rounded-full bg-white/5 border border-white/10 px-2 py-1">
+                    Submit
+                  </span>
+                  <span className="rounded-full bg-white/5 border border-white/10 px-2 py-1">
+                    Community review
+                  </span>
+                </div>
+              </div>
+            </GlassCard>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
